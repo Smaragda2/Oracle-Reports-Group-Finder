@@ -1,18 +1,18 @@
 # Oracle Report Group Finder
 
-A small, portable Windows utility for finding every **Frame** and **Repeating Frame** in an Oracle Reports layout whose **Source** points to a selected Data Model **Group**.
+A portable Windows utility for finding every **Frame** and **Repeating Frame** in an Oracle Reports layout whose **Source** points to a selected Data Model **Group**.
 
-It is especially useful with older or large Oracle Reports where object names such as `F_154`, `F_23`, `R_17`, etc. do not make the relationship between the layout and a group obvious.
+It is especially useful with older or large Oracle Reports where layout objects have non-descriptive names such as `F_154`, `F_23`, `R_17`, etc., making it difficult to understand which objects belong to a specific group through Oracle Reports Builder alone.
 
 ## What it does
 
-Given a group such as:
+Given a Data Model group such as:
 
 ```text
 G_PERCENTAGE1
 ```
 
-the tool searches the report definition and shows all layout objects whose `Source` uses that group, for example:
+the tool searches the report definition and shows all supported layout objects whose `Source` uses that group, for example:
 
 ```text
 GROUP: G_PERCENTAGE1
@@ -37,16 +37,26 @@ The results can include:
 - Child Frames
 - Layout Section, when available
 
-This gives Oracle Reports developers a practical **Find Usages for Group/Source** workflow that is missing from the classic Reports Builder UI.
+This provides a practical **Find Usages for Group/Source** workflow that is missing from the classic Oracle Reports Builder UI.
 
 ## Typical use cases
 
 - Find where a Data Model Group is used in the report layout.
 - Locate Frames whose names do not match the Group name.
-- Understand old reports with generated names such as `F_154`, `F_23`, etc.
-- Investigate layout ownership before changing or migrating an Oracle Report.
+- Understand legacy reports with generated names such as `F_154`, `F_23`, etc.
+- Investigate layout ownership before changing an Oracle Report.
 - Assist Oracle Reports / Oracle Forms modernization and migration work.
 - Quickly inspect report structure without checking each Property Palette entry manually.
+
+## Download
+
+The ready-to-run Windows executable is published in the repository's **Releases** section:
+
+```text
+OracleReportGroupFinder.exe
+```
+
+No installation is required. The application is portable and can be run directly.
 
 ## Supported input files
 
@@ -56,11 +66,17 @@ This gives Oracle Reports developers a practical **Find Usages for Group/Source*
 | `.rex` | Yes | No | Parsed directly. |
 | `.xml` | Yes | No | Parsed directly. |
 
-### RDF conversion
+## Requirements
 
-For `.rdf` files, Oracle's Reports Converter is still required because RDF is Oracle's binary report-definition format.
+### When opening an RDF
 
-The tool accepts converter executables/scripts such as:
+You need:
+
+1. `OracleReportGroupFinder.exe`
+2. The `.rdf` report file
+3. A compatible Oracle Reports converter, for example `RWCON60.EXE` for Oracle Reports 6i
+
+Supported converter names include:
 
 ```text
 RWCON60.EXE
@@ -69,41 +85,19 @@ rwconverter.bat
 rwconverter.cmd
 ```
 
-For Oracle Reports 6i, `RWCON60.EXE` is the normal choice. The tool converts:
+For Oracle Reports 6i, `RWCON60.EXE` is the normal choice.
+
+The tool performs the conversion:
 
 ```text
 RDF -> REX
 ```
 
-using parameters equivalent to:
+and then analyzes the generated report definition.
 
-```text
-stype=rdffile
-source=<temporary RDF>
-dtype=rexfile
-dest=<temporary REX>
-overwrite=yes
-batch=yes
-logfile=<log file>
-```
+If `USERID` is entered in the application, it is passed to the Oracle converter when required by the report/environment.
 
-If `USERID` is entered in the UI, it is also passed to the Oracle converter.
-
-The original RDF is not modified.
-
-## Requirements
-
-### When opening an RDF
-
-You need:
-
-1. `OracleReportGroupFinder.exe`
-2. The `.rdf` file to inspect
-3. A compatible Oracle Reports converter, for example `RWCON60.EXE` for Oracle Reports 6i
-
-No Java/JRE installation is required.
-No .NET installation is required.
-No installer is required.
+The original RDF file is not modified.
 
 > The Oracle converter is **not distributed with this repository**. It is an Oracle component and must come from an Oracle Reports installation/environment that you are licensed to use.
 
@@ -112,9 +106,20 @@ No installer is required.
 You only need:
 
 1. `OracleReportGroupFinder.exe`
-2. The `.rex` or `.xml` file
+2. The `.rex` or `.xml` report file
 
-No Oracle converter is required for direct REX/XML loading.
+No Oracle Reports converter is required when loading REX or XML directly.
+
+## No additional runtime installation required
+
+The published executable does **not** require:
+
+- Java / JRE
+- .NET installation
+- An installer
+- An internet connection
+
+For `.rdf` input, only the Oracle Reports converter described above is additionally required.
 
 ## Windows compatibility
 
@@ -122,11 +127,9 @@ The published executable is **64-bit Windows**.
 
 ### Verified
 
-- Windows Server 2008 R2 x64 — tested successfully with the tool.
+- **Windows Server 2008 R2 x64** — tested successfully.
 
-### Compatibility target
-
-The executable/source is designed for:
+### Compatible target environments
 
 - Windows Server 2008 R2 x64 or later
 - Windows Server 2012 / 2012 R2
@@ -139,24 +142,22 @@ The executable/source is designed for:
 - Windows 10 x64
 - Windows 11 x64
 
-The compatibility build uses **Go 1.20.x**, because Go 1.20 is the final upstream Go release line that supports Windows 7 and Windows Server 2008 R2.
-
 ## Oracle Reports compatibility
 
-The tool was built specifically around the report-definition formats used by classic Oracle Reports and has working support for the Oracle Reports 6i `RWCON60.EXE` workflow.
+The tool was created primarily for classic Oracle Reports and has been tested with the **Oracle Reports 6i `RWCON60.EXE`** workflow.
 
-It can also accept later `rwconverter` executables/scripts as long as they support RDF-to-REX conversion and can read the source RDF.
+It can also use later `rwconverter` executables/scripts when they support RDF-to-REX conversion and can read the source RDF.
 
-Important: the Oracle converter itself must be compatible with the RDF you are trying to convert. This tool does not replace Oracle's RDF reader; it automates the conversion and then analyzes the resulting definition.
+The Oracle converter itself must be compatible with the RDF being converted. Oracle Report Group Finder does not replace Oracle's RDF reader; it automates the conversion and analyzes the resulting report definition.
 
 ## How to use
 
 1. Run `OracleReportGroupFinder.exe`.
-2. If you are opening an `.rdf`, select the Oracle Reports converter, e.g. `RWCON60.EXE`.
+2. If opening an `.rdf`, select the Oracle Reports converter, for example `RWCON60.EXE`.
 3. Select the report file: `.rdf`, `.rex`, or `.xml`.
-4. Optionally enter `USERID` if your Oracle conversion requires it.
+4. Optionally enter `USERID` if the Oracle conversion requires it.
 5. Click **Convert & Load**.
-6. Select or type the Group, e.g. `G_PERCENTAGE1`.
+6. Select or type the Group, for example `G_PERCENTAGE1`.
 7. Click **Search Group**.
 8. Review all Frames and Repeating Frames whose Source matches the selected Group.
 
@@ -166,21 +167,21 @@ For RDF input, the generated REX is normally saved next to the original report a
 <report-name>_groupfinder.rex
 ```
 
-If the original report directory is not writable, the tool can continue using its temporary converted file.
+If the original report directory is not writable, the application can continue using the temporary converted file.
 
 ## Non-ASCII / Greek paths
 
-Older Oracle Reports tools can have problems with Unicode or non-ASCII paths.
+Older Oracle Reports utilities may have problems with Unicode or non-ASCII paths.
 
-To reduce this problem, the application copies the RDF to a temporary **ASCII-only** working directory before calling the Oracle converter.
+To reduce this problem, Oracle Report Group Finder copies the RDF to a temporary **ASCII-only** working directory before calling the Oracle converter.
 
-For example, an RDF stored under a path containing Greek characters can still be converted without passing that original path directly to `RWCON60.EXE`.
+This allows reports located in folders containing Greek or other non-ASCII characters to be processed without passing the original path directly to older Oracle utilities such as `RWCON60.EXE`.
 
-## How the parsing works
+## How the analysis works
 
 ### XML
 
-The XML parser reads the report hierarchy and records:
+The XML parser reads the report hierarchy and records relevant information including:
 
 - Groups
 - Frames
@@ -190,13 +191,13 @@ The XML parser reads the report hierarchy and records:
 
 ### REX
 
-The REX parser reads Oracle `DEFINE` blocks and known properties used for Groups and layout Frames.
+The REX parser reads Oracle report-definition structures and properties used for Groups and layout Frames.
 
-When an explicit parent-frame identifier exists, it is used directly.
+When an explicit parent-frame relationship is available, it is used directly.
 
-Older REX variants do not always expose a documented parent relationship. In that case, the tool performs a best-effort hierarchy reconstruction using the layout rectangles: the smallest enclosing Frame is treated as the parent.
+Some older REX variants do not expose a clear documented parent relationship. In those cases, the tool can perform a best-effort hierarchy reconstruction using layout rectangles, where the smallest enclosing Frame is treated as the parent.
 
-The **Source match itself** is independent from this visual parent/child inference. The hierarchy is supplementary information.
+The **Source match itself does not depend on this hierarchy inference**. Parent/child information is supplementary to the Group-to-Source match.
 
 ## Generated files
 
@@ -207,87 +208,35 @@ OracleReportGroupFinder.ini
 <report-name>_groupfinder.rex
 ```
 
-`OracleReportGroupFinder.ini` stores only the last selected converter path, when the executable directory is writable.
+`OracleReportGroupFinder.ini` stores the last selected converter path when the executable directory is writable.
 
-Temporary conversion files are created under the Windows temporary directory and normally removed automatically.
+Temporary conversion files are created under the Windows temporary directory and are normally removed automatically.
 
-## Privacy / network behavior
+## Privacy and network behavior
 
 The application works locally.
 
-- It does not upload report files.
-- It does not call an online API.
-- It does not require an internet connection.
-- Report conversion is performed locally by the selected Oracle converter.
+- Report files are not uploaded anywhere.
+- No online API is called.
+- No internet connection is required.
+- RDF conversion is performed locally by the selected Oracle Reports converter.
 
 ## Limitations
 
-- RDF cannot be parsed directly; an Oracle Reports converter is required first.
+- Binary RDF files cannot be analyzed directly by this tool; they must first be converted by a compatible Oracle Reports converter.
 - The published executable is x64 only.
 - REX layout hierarchy may require geometric inference when explicit ownership information is unavailable.
-- Different Oracle Reports releases may produce slightly different REX structures. If a specific report format is not recognized, the REX parser may need another mapping for that release.
-- `USERID` is passed to the Oracle converter when provided; it is not stored by this tool.
+- Different Oracle Reports releases may produce slightly different REX structures. A specific format variant may require additional parser mapping.
+- `USERID`, when provided, is passed to the Oracle converter and is not stored by Oracle Report Group Finder.
 
-## Build from source
+## Source code
 
-The application is written in Go and uses only the Go standard library plus native Win32 APIs. There are no third-party Go dependencies.
+The repository includes the application source code for reference, maintenance and future improvements.
 
-### Build the Windows Server 2008 R2-compatible executable
+The supported executable for normal use is the version published under **GitHub Releases**.
 
-Install **Go 1.20.x** and run:
+## Disclaimer
 
-```bat
-build.bat
-```
+Oracle and Oracle Reports are trademarks of Oracle Corporation and/or its affiliates.
 
-The executable will be created at:
-
-```text
-dist\OracleReportGroupFinder.exe
-```
-
-`build.bat` intentionally rejects Go 1.21+ for the legacy-compatible build because upstream Go 1.21 dropped support for Windows 7 and Windows Server 2008 R2.
-
-### GitHub Actions
-
-The repository includes:
-
-```text
-.github/workflows/build-windows.yml
-```
-
-It builds the application with Go `1.20.14` and uploads the Windows x64 executable as a workflow artifact. This allows the project to be built directly in GitHub without an IDE.
-
-## Repository structure
-
-```text
-.
-├── .github/
-│   └── workflows/
-│       └── build-windows.yml
-├── .gitignore
-├── README.md
-├── build.bat
-├── go.mod
-└── main.go
-```
-
-## GitHub Releases
-
-A good repository setup is to keep source code in the repository and attach the compiled `.exe` to **GitHub Releases** instead of committing binaries to the source tree.
-
-Example release asset:
-
-```text
-OracleReportGroupFinder.exe
-```
-
-## Why this tool exists
-
-Oracle Reports Builder exposes the `Source` property in the Property Palette, but large legacy reports can contain many Frames with non-descriptive generated names. There is no convenient modern-style `Find Usages` workflow that starts from a Group and immediately lists every layout Frame using it.
-
-Oracle Report Group Finder fills that gap: select a Group and get the relevant Frames and Repeating Frames in one place, making report maintenance, debugging, reverse engineering, and migration much faster.
-
-## Project status / disclaimer
-
-This is an independent utility and is not affiliated with or endorsed by Oracle. Oracle, Oracle Reports, and related product names are trademarks of Oracle and/or its affiliates.
+Oracle Report Group Finder is an independent utility and is not affiliated with or endorsed by Oracle Corporation. Oracle binaries such as `RWCON60.EXE` or `rwconverter` are not included in this repository.
